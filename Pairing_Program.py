@@ -7,17 +7,22 @@ mentor = []
 
 class student:
 
-    def __init__(self, name, field, major, responses):
-        # field will be the broader catagory of their major, like chem bio micro bio all fall into lifescience
-        # and stat math cpsc would all fall into computation
-        # data structure fro responses will be a set of enumerations, atleast for now
+    def __init__(self, name, field, major, first, career, skill, hobby, online, second):
+        # data structure for responses will be a set of enumerations, atleast for now
         # sets have O(1) lookup time so we dont need to iterate through the list every time
         self.name = name
         self.field = field
         self.major = major
-        self.responses = set()
-        for s in responses:
-            self.responses.add(s)
+        self.first = list()
+        for s in first:
+            self.first.append(s)
+        self.career = career
+        self.skill = skill
+        self.hobby = hobby
+        self.online = online
+        self.second = list()
+        for s in second:
+            self.second.append(s)
     
     def get_name(self):
         return self.name
@@ -25,8 +30,26 @@ class student:
     def get_field(self):
         return self.field
 
-    def get_responses(self):
-        return self.responses
+    def get_major(self):
+        return self.major
+
+    def get_first(self):
+        return self.first
+    
+    def get_career(self):
+        return self.career
+
+    def get_skill(self):
+        return self.skill
+
+    def get_hobby(self):
+        return self.hobby
+
+    def get_online(self):
+        return self.online
+
+    def get_second(self):
+        return self.second
 
 
 def read(filename, formentee):
@@ -38,16 +61,20 @@ def read(filename, formentee):
         
         reader = csv.reader(csvfile) # turns the spreadsheet into a reader object
         next(reader) # skip header line
+        # CHECK YOUR INDENTS
+    
+        if formentee:
+            for row in reader:
 
-    if (formentee):
-        for row in reader:
-            s = student("generic", "somefield", "major", ["list", "of", "question", "resposnes"])
-            # choose the correct row for example student(row[2], row[6].....[row[7], row[8]...] )
-            mentee.append(s)
-    else: 
-        for row in reader:
-            s = student("generic", "somefield", "major", ["list", "of", "question", "resposnes"])
-            mentor.append(s)
+                s = student(row[0], row[2], row[3], [row[5], row[6], row[7], row[8], row[9]], row[10], row[11], row[12], row[13], 
+                    [row[14], row[15], row[16], row[17]])
+                # choose the correct row for example student(row[2], row[6].....[row[7], row[8]...] )
+                mentee.append(s)
+        else: 
+            for row in reader:
+                s = student(row[0], row[2], row[3], [row[5], row[6], row[7], row[8], row[9]], row[10], row[11], row[12], row[13], 
+                    [row[14], row[15], row[16], row[17]])
+                mentor.append(s)
 
 
 def compare(mentee, mentor):
@@ -61,10 +88,22 @@ def compare(mentee, mentor):
     score = 0
 
     if (mentee.get_field() == mentor.get_field()): # prob needs a getter funciton in student
-        # not sure why my getter doesnt work
-        score += 80
-    score += 10*len(mentee.get_responses() - (mentee.get_responses() - mentor.get_responses()))\
-
+        score += 10
+    if (mentee.get_major() == mentor.get_major()):
+        score += 7
+    for i in range(5):
+        if (mentee.get_first()[i] == 1 and mentee.get_first()[i] == mentor.get_first()[i]):
+            score += 5
+    if (mentee.get_career() == mentor.get_career()):
+        score += 7
+    if (mentee.get_skill() == mentor.get_skill()): 
+        score += 2
+    if (mentee.get_online() == mentor.get_online()): # online
+        score += 2
+    for i in range(4): # workshops
+        if (mentee.get_second()[i] == 1 and mentee.get_second()[i] == mentor.get_second()[i]):
+            score += 2
+    
     return score 
 
 
@@ -91,14 +130,20 @@ def get_matches(threshhold):
 
     for current in mentee:
         possible = [] # list of menotrs for this mentee, gets reset every iteration
-        for mentor in mentor:
-            if (threshhold <= compare(current, mentor)): # compare will return the score
-                possible.append(mentor.get_name() + str(compare(current, mentor)))
+        for m in mentor:
+            score = compare(current, m)
+            if (threshhold <= score): # compare will return the score
+                possible.append(m.get_name() + str(score))
+        
+        print("--------")
+        print(current.get_name())
         print(possible)
+        print("--------")
 
 
-def main(mentee, mentor, threashold):
-    read(mentee, True)
-    read(mentor, False)
+def main(menteecsv, mentorcsv, threashold):
+    read(menteecsv, True)
+    read(mentorcsv, False)
     get_matches(threashold)
 
+main("Mentee.csv", "Mentor.csv", 13)
